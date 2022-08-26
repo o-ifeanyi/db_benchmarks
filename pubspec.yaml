@@ -1,0 +1,35 @@
+name: db_benchmarks
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  path_provider: ^2.0.2
+  hive: ^2.2.3
+  sqflite: ^2.0.0+3
+  sembast: ^3.2.0+1
+  objectbox: ^1.6.1
+  objectbox_flutter_libs: any
+  isar: ^2.5.0
+  isar_flutter_libs: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+  build_runner: ^2.0.0
+  objectbox_generator: any
+  isar_generator: any
+
+flutter:
+
+  uses-material-design: true
