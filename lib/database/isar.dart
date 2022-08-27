@@ -22,6 +22,8 @@ class IsarDBImpl implements Benchmark {
     }
 
     isar = await Isar.open(schemas: [IsarUserModelSchema], directory: dbPath);
+    // delete all users in the schema
+    await isar.writeTxn((isar) => isar.isarUserModels.clear());
   }
 
   @override

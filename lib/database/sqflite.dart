@@ -31,6 +31,7 @@ class SqfliteDBImpl implements Benchmark {
       },
       version: 1,
     );
+    db.delete(USER_TABLE); // delete all users in the table
   }
 
   @override

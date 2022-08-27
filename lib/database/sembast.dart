@@ -25,6 +25,7 @@ class SembasDBImpl implements Benchmark {
 
     db = await databaseFactoryIo.openDatabase(dbPath);
     store = StoreRef('users');
+    store.delete(db); // delete all users in the db
   }
 
   @override

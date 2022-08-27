@@ -23,6 +23,7 @@ class ObjectBoxDBImpl implements Benchmark {
 
     store = await openStore(directory: dbPath);
     box = store.box<ObjBoxUserModel>();
+    box.removeAll(); // delete all users in the box
   }
 
   @override

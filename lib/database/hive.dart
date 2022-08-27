@@ -22,11 +22,11 @@ class HiveDBImpl implements Benchmark {
 
     Hive.init(dbPath);
     box = await Hive.openBox('box');
+    await box.clear(); // delete all users in the box
   }
 
   @override
   Future<void> tearDown() async {
-    await box.close();
     await Hive.close();
   }
 
