@@ -3,6 +3,8 @@ This project was carried out to compare [**Hive**](https://pub.dev/packages/hive
 
 ![Image](ss/bm.jpg)
 
+All benchmark results were gotten while running the project in release mode on a physical iPhone 12 v 15.6 in other to get a good performance.
+
 ## 🚀 Benchmark Results
 
 **Results (time in milliseconds) from 10 consecutive runs for 1000 write ✍️ operations**
