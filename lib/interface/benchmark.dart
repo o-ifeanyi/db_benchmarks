@@ -1,6 +1,6 @@
 import 'package:db_benchmarks/interface/user.dart';
 
-enum BenchmarkType { write, read, delete }
+enum BenchmarkType { write, read, delete, size }
 
 abstract class Benchmark {
   String get name;
@@ -12,4 +12,5 @@ abstract class Benchmark {
   Future<int> writeUsers(List<User> users, bool optimise);
   Future<int> readUsers(List<User> users, bool optimise);
   Future<int> deleteUsers(List<User> users, bool optimise);
+  Future<int> getDbSize();
 }

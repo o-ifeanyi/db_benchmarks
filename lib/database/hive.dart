@@ -5,7 +5,6 @@ import 'package:db_benchmarks/model/user.dart';
 import 'package:hive/hive.dart';
 import 'package:db_benchmarks/interface/benchmark.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class HiveDBImpl implements Benchmark {
   late Box box;
@@ -15,12 +14,8 @@ class HiveDBImpl implements Benchmark {
   @override
   Future<void> setUp() async {
     final dir = await getApplicationDocumentsDirectory();
-    final dbPath = path.join(dir.path, 'hive.db');
-    if (await File(dbPath).exists()) {
-      await File(dbPath).delete();
-    }
 
-    Hive.init(dbPath);
+    Hive.init(dir.path);
     box = await Hive.openBox('box');
     await box.clear(); // delete all users in the box
   }
@@ -28,6 +23,10 @@ class HiveDBImpl implements Benchmark {
   @override
   Future<void> tearDown() async {
     await Hive.close();
+    final dir = await getApplicationDocumentsDirectory();
+    if (await Directory(dir.path).exists()) {
+      await Directory(dir.path).delete(recursive: true);
+    }
   }
 
   @override
@@ -91,5 +90,19 @@ class HiveDBImpl implements Benchmark {
         age: 25,
       ),
     );
+  }
+
+  @override
+  Future<int> getDbSize() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final files = dir
+        .listSync(recursive: true)
+        .where((file) => file.path.toLowerCase().contains('box'));
+    int size = 0;
+    for (FileSystemEntity file in files) {
+      final stat = file.statSync();
+      size += stat.size;
+    }
+    return size;
   }
 }

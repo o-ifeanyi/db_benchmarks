@@ -5,7 +5,6 @@ import 'package:db_benchmarks/interface/user.dart';
 import 'package:db_benchmarks/model/object_box_user.dart';
 import 'package:db_benchmarks/objectbox.g.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class ObjectBoxDBImpl implements Benchmark {
   late Store store;
@@ -15,13 +14,9 @@ class ObjectBoxDBImpl implements Benchmark {
 
   @override
   Future<void> setUp() async {
-    var dir = await getApplicationDocumentsDirectory();
-    var dbPath = path.join(dir.path, 'objectbox.db');
-    if (await File(dbPath).exists()) {
-      await File(dbPath).delete();
-    }
+    final dir = await getApplicationDocumentsDirectory();
 
-    store = await openStore(directory: dbPath);
+    store = await openStore(directory: dir.path);
     box = store.box<ObjBoxUserModel>();
     box.removeAll(); // delete all users in the box
   }
@@ -29,6 +24,10 @@ class ObjectBoxDBImpl implements Benchmark {
   @override
   Future<void> tearDown() async {
     store.close();
+    final dir = await getApplicationDocumentsDirectory();
+    if (await Directory(dir.path).exists()) {
+      await Directory(dir.path).delete(recursive: true);
+    }
   }
 
   @override
@@ -97,5 +96,19 @@ class ObjectBoxDBImpl implements Benchmark {
         age: 25,
       ),
     );
+  }
+
+  @override
+  Future<int> getDbSize() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final files = dir
+        .listSync(recursive: true)
+        .where((file) => file.path.toLowerCase().endsWith('.mdb'));
+    int size = 0;
+    for (FileSystemEntity file in files) {
+      final stat = file.statSync();
+      size += stat.size;
+    }
+    return size;
   }
 }

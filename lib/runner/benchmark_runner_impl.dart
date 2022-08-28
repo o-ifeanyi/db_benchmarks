@@ -60,4 +60,19 @@ class BenchmarkRunnerImpl implements BenchmarkRunner {
 
     return results;
   }
+
+  @override
+  Future<List<Result>> benchmarkSize(int count) async {
+    final results = _createResults();
+
+    for (var result in results) {
+      await result.benchmark.setUp();
+      final users = result.benchmark.generateUsers(count);
+      await result.benchmark.writeUsers(users, result.optimised);
+      result.dbSize = await result.benchmark.getDbSize();
+      await result.benchmark.tearDown();
+    }
+
+    return results;
+  }
 }

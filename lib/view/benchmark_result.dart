@@ -1,18 +1,15 @@
+import 'package:db_benchmarks/interface/benchmark.dart';
 import 'package:db_benchmarks/model/result.dart';
 import 'package:flutter/material.dart';
 
 class BenchmarkResult extends StatelessWidget {
   final double width = 12;
 
-  final List<Result> results;
+  final Map<BenchmarkType, List<Result>> benchmarks;
 
-  BenchmarkResult(this.results);
+  BenchmarkResult(this.benchmarks);
 
-  List<String> get labels {
-    return results.map((r) => r.benchmark.name).toList();
-  }
-
-  int get maxResultTime {
+  int maxResultTime(List<Result> results) {
     var max = 1;
     for (var result in results) {
       if (result.timeElapsed > max) {
@@ -22,33 +19,69 @@ class BenchmarkResult extends StatelessWidget {
     return max;
   }
 
+  int maxDbSize(List<Result> results) {
+    var max = 1;
+    for (var result in results) {
+      if (result.dbSize > max) {
+        max = result.dbSize;
+      }
+    }
+    return max;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: results.map((e) {
-        return Container(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(e.benchmark.name),
-                  Text('${e.timeElapsed}ms'),
-                ],
-              ),
-              SizedBox(height: 5),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: LinearProgressIndicator(
-                  minHeight: 8,
-                  value: e.timeElapsed.toDouble() / maxResultTime,
+      children: benchmarks.keys.map(
+        (bType) {
+          final isSize = bType == BenchmarkType.size;
+          final results = benchmarks[bType] ?? [];
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  bType.name.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 15),
-            ],
-          ),
-        );
-      }).toList(),
+                SizedBox(height: 10),
+                ...results.map(
+                  (e) {
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(e.benchmark.name),
+                            isSize
+                                ? Text('${e.databaseSize}mb')
+                                : Text('${e.timeElapsed}ms'),
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: LinearProgressIndicator(
+                            minHeight: 8,
+                            value: isSize
+                                ? e.dbSize.toDouble() / maxDbSize(results)
+                                : e.timeElapsed.toDouble() /
+                                    maxResultTime(results),
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ).toList(),
     );
   }
 }

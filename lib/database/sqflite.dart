@@ -16,11 +16,8 @@ class SqfliteDBImpl implements Benchmark {
 
   @override
   Future<void> setUp() async {
-    var dir = await getApplicationDocumentsDirectory();
-    var dbPath = path.join(dir.path, 'sqlite.db');
-    if (await File(dbPath).exists()) {
-      await File(dbPath).delete();
-    }
+    final dir = await getApplicationDocumentsDirectory();
+    final dbPath = path.join(dir.path, 'sqlite.db');
 
     db = await openDatabase(
       dbPath,
@@ -31,12 +28,16 @@ class SqfliteDBImpl implements Benchmark {
       },
       version: 1,
     );
-    db.delete(USER_TABLE); // delete all users in the table
+    await db.delete(USER_TABLE); // delete all users in the table
   }
 
   @override
   Future<void> tearDown() async {
     await db.close();
+    final dir = await getApplicationDocumentsDirectory();
+    if (await Directory(dir.path).exists()) {
+      await Directory(dir.path).delete(recursive: true);
+    }
   }
 
   @override
@@ -93,5 +94,19 @@ class SqfliteDBImpl implements Benchmark {
         age: 25,
       ),
     );
+  }
+
+  @override
+  Future<int> getDbSize() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final files = dir
+        .listSync()
+        .where((file) => file.path.toLowerCase().contains('sqlite'));
+    int size = 0;
+    for (FileSystemEntity file in files) {
+      final stat = file.statSync();
+      size += stat.size;
+    }
+    return size;
   }
 }

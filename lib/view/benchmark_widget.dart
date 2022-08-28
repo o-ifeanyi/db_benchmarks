@@ -103,26 +103,7 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
                     child: Text('Run benchmark to show data'),
                   )
                 else
-                  ...benchmarkResults!.keys.map(
-                    (e) {
-                      return Container(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Text(
-                              e.name.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            BenchmarkResult(benchmarkResults![e]!)
-                          ],
-                        ),
-                      );
-                    },
-                  ).toList(),
+                  BenchmarkResult(benchmarkResults!),
                 SizedBox(height: 100),
               ],
             ),
@@ -175,6 +156,9 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
           break;
         case BenchmarkType.delete:
           results[type] = await _benchmarkRunner.benchmarkDelete(entries);
+          break;
+        case BenchmarkType.size:
+          results[type] = await _benchmarkRunner.benchmarkSize(entries);
           break;
       }
     }

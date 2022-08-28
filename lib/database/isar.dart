@@ -5,7 +5,6 @@ import 'package:db_benchmarks/interface/user.dart';
 import 'package:db_benchmarks/model/isar_user.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class IsarDBImpl implements Benchmark {
   late Isar isar;
@@ -15,20 +14,20 @@ class IsarDBImpl implements Benchmark {
 
   @override
   Future<void> setUp() async {
-    var dir = await getApplicationDocumentsDirectory();
-    var dbPath = path.join(dir.path, 'isar.db');
-    if (await File(dbPath).exists()) {
-      await File(dbPath).delete();
-    }
+    final dir = await getApplicationDocumentsDirectory();
 
-    isar = await Isar.open(schemas: [IsarUserModelSchema], directory: dbPath);
+    isar = await Isar.open(schemas: [IsarUserModelSchema], directory: dir.path);
     // delete all users in the schema
-    await isar.writeTxn((isar) => isar.isarUserModels.clear());
+    await isar.writeTxn((isar) async => await isar.isarUserModels.clear());
   }
 
   @override
   Future<void> tearDown() async {
     await isar.close();
+    final dir = await getApplicationDocumentsDirectory();
+    if (await Directory(dir.path).exists()) {
+      await Directory(dir.path).delete(recursive: true);
+    }
   }
 
   @override
@@ -105,5 +104,19 @@ class IsarDBImpl implements Benchmark {
         age: 25,
       ),
     );
+  }
+
+  @override
+  Future<int> getDbSize() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final files = dir
+        .listSync(recursive: true)
+        .where((file) => file.path.toLowerCase().contains('isar'));
+    int size = 0;
+    for (FileSystemEntity file in files) {
+      final stat = file.statSync();
+      size += stat.size;
+    }
+    return size;
   }
 }

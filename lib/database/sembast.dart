@@ -17,20 +17,21 @@ class SembasDBImpl implements Benchmark {
 
   @override
   Future<void> setUp() async {
-    var dir = await getApplicationDocumentsDirectory();
-    var dbPath = path.join(dir.path, 'sembast.db');
-    if (await File(dbPath).exists()) {
-      await File(dbPath).delete();
-    }
+    final dir = await getApplicationDocumentsDirectory();
+    final dbPath = path.join(dir.path, 'sembast.db');
 
     db = await databaseFactoryIo.openDatabase(dbPath);
     store = StoreRef('users');
-    store.delete(db); // delete all users in the db
+    await store.delete(db); // delete all users in the db
   }
 
   @override
   Future<void> tearDown() async {
     await db.close();
+    final dir = await getApplicationDocumentsDirectory();
+    if (await Directory(dir.path).exists()) {
+      await Directory(dir.path).delete(recursive: true);
+    }
   }
 
   @override
@@ -75,5 +76,19 @@ class SembasDBImpl implements Benchmark {
         age: 25,
       ),
     );
+  }
+
+  @override
+  Future<int> getDbSize() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final files = dir
+        .listSync()
+        .where((file) => file.path.toLowerCase().contains('sembast'));
+    int size = 0;
+    for (FileSystemEntity file in files) {
+      final stat = file.statSync();
+      size += stat.size;
+    }
+    return size;
   }
 }
