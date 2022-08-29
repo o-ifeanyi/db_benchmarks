@@ -24,10 +24,6 @@ class ObjectBoxDBImpl implements Benchmark {
   @override
   Future<void> tearDown() async {
     store.close();
-    final dir = await getApplicationDocumentsDirectory();
-    if (await Directory(dir.path).exists()) {
-      await Directory(dir.path).delete(recursive: true);
-    }
   }
 
   @override
