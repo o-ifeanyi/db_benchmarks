@@ -1,5 +1,5 @@
 # DB Benchmarks
-This project was carried out to compare [**Hive**](https://pub.dev/packages/hive) to other database options ([**Sembast**](https://pub.dev/packages/sembast), [**Sqflite**](https://pub.dev/packages/sqflite), [**Isar**](https://pub.dev/packages/isar), [**Objectbox**](https://pub.dev/packages/objectbox)). You can read the full article [**Here**](https://linktoarticle.com).
+This project was carried out to compare [**Hive**](https://pub.dev/packages/hive) to other database options ([**Sembast**](https://pub.dev/packages/sembast), [**Sqflite**](https://pub.dev/packages/sqflite), [**Isar**](https://pub.dev/packages/isar), [**Objectbox**](https://pub.dev/packages/objectbox)). You can read the full article [**Here**](https://blog.logrocket.com/comparing-hive-other-flutter-app-database-options).
 
 ## 🚀 iOS Benchmark Results
 
