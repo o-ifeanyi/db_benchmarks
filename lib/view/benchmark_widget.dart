@@ -4,6 +4,8 @@ import 'package:db_benchmarks/database/object_box.dart';
 import 'package:db_benchmarks/database/sembast.dart';
 import 'package:db_benchmarks/database/sqflite.dart';
 import 'package:db_benchmarks/database/sqflite_ffi.dart';
+import 'package:db_benchmarks/database/sqflite_json.dart';
+import 'package:db_benchmarks/database/sqlite_sync.dart';
 import 'package:db_benchmarks/interface/benchmark.dart';
 import 'package:db_benchmarks/model/result.dart';
 import 'package:db_benchmarks/runner/benchmark_runner_impl.dart';
@@ -42,6 +44,8 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
       HiveDBImpl(),
       SqfliteDBImpl(),
       SqfliteFFIDBImpl(),
+      SqfliteJsonDBImpl(),
+      SqliteSyncDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];
