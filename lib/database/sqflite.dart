@@ -30,6 +30,9 @@ class SqfliteDBImpl implements Benchmark {
       },
       version: 1,
     );
+    await db.rawQuery('PRAGMA journal_mode = WAL');
+    await db.rawQuery('PRAGMA synchronous = NORMAL');
+    await db.rawQuery('PRAGMA locking_mode = EXCLUSIVE');
     await db.delete(USER_TABLE); // delete all users in the table
   }
 

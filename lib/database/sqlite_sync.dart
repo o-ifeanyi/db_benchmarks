@@ -21,6 +21,9 @@ class SqliteSyncDBImpl implements Benchmark {
     final dbPath = path.join(dir.path, 'sqlite-sync.db');
 
     db = sqlite3.open(dbPath);
+    db.execute('PRAGMA journal_mode = WAL');
+    db.execute('PRAGMA synchronous = NORMAL');
+    db.execute('PRAGMA locking_mode = EXCLUSIVE');
 
     db.execute(
         'CREATE TABLE IF NOT EXISTS $USER_TABLE (id TEXT PRIMARY KEY, createdAt TEXT, username TEXT, email TEXT, age INTEGER)');
@@ -38,10 +41,15 @@ class SqliteSyncDBImpl implements Benchmark {
     var s = Stopwatch()..start();
     final ids = users.map((e) => e.id).toList();
     var stmt = db.prepare("SELECT * FROM $USER_TABLE WHERE id = ? LIMIT 1");
+    db.execute('BEGIN');
     try {
       for (var user in users) {
         var results = stmt.execute([user.id]);
       }
+      db.execute('COMMIT');
+    } catch (e) {
+      db.execute('ROLLBACK');
+      rethrow;
     } finally {
       stmt.dispose();
     }
@@ -52,7 +60,7 @@ class SqliteSyncDBImpl implements Benchmark {
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    db.execute('BEGIN');
+    db.execute('BEGIN EXCLUSIVE');
     var stmt = db
         .prepare("""INSERT INTO $USER_TABLE(id, createdAt, username, email, age)
               VALUES(?, ?, ?, ?, ?)""");
@@ -80,7 +88,7 @@ class SqliteSyncDBImpl implements Benchmark {
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    db.execute('BEGIN');
+    db.execute('BEGIN EXCLUSIVE');
     var stmt = db.prepare("""DELETE FROM $USER_TABLE WHERE id = ?""");
     try {
       for (var user in users) {
