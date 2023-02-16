@@ -5,21 +5,24 @@ import 'package:db_benchmarks/interface/user.dart';
 import 'package:db_benchmarks/model/user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as path;
 
-class SqfliteDBImpl implements Benchmark {
+class SqfliteFFIDBImpl implements Benchmark {
   late Database db;
   static const String USER_TABLE = "users";
 
   @override
-  String get name => 'Sqflite';
+  String get name => 'Sqflite (FFI)';
 
   @override
   Future<void> setUp() async {
     final dir = await getApplicationDocumentsDirectory();
-    final dbPath = path.join(dir.path, 'sqlite-sqflite.db');
+    final dbPath = path.join(dir.path, 'sqlite-ffi.db');
 
-    databaseFactory = null;
+    sqfliteFfiInit();
+
+    databaseFactory = databaseFactoryFfi;
 
     db = await openDatabase(
       dbPath,
@@ -139,7 +142,7 @@ class SqfliteDBImpl implements Benchmark {
     final dir = await getApplicationDocumentsDirectory();
     final files = dir
         .listSync()
-        .where((file) => file.path.toLowerCase().contains('sqlite-sqflite'));
+        .where((file) => file.path.toLowerCase().contains('sqlite-ffi'));
     int size = 0;
     for (FileSystemEntity file in files) {
       final stat = file.statSync();

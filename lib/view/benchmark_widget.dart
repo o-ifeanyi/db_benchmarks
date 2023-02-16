@@ -3,6 +3,7 @@ import 'package:db_benchmarks/database/isar.dart';
 import 'package:db_benchmarks/database/object_box.dart';
 import 'package:db_benchmarks/database/sembast.dart';
 import 'package:db_benchmarks/database/sqflite.dart';
+import 'package:db_benchmarks/database/sqflite_ffi.dart';
 import 'package:db_benchmarks/interface/benchmark.dart';
 import 'package:db_benchmarks/model/result.dart';
 import 'package:db_benchmarks/runner/benchmark_runner_impl.dart';
@@ -33,12 +34,14 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
       HiveDBImpl(),
       SembasDBImpl(),
       SqfliteDBImpl(),
+      SqfliteFFIDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];
     optimisedRunners = [
       HiveDBImpl(),
       SqfliteDBImpl(),
+      SqfliteFFIDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];
