@@ -28,56 +28,47 @@ class ObjectBoxDBImpl implements Benchmark {
 
   @override
   Future<int> readUsers(List<User> users, bool optimise) async {
+    final s = Stopwatch()..start();
     if (optimise) {
       final ids = users.map((e) => e.id).toList();
-      final s = Stopwatch()..start();
       box.getMany(ids);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      final s = Stopwatch()..start();
       for (var user in users) {
         box.get(user.id);
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
     final castUsers = List.castFrom<User, ObjBoxUserModel>(users);
+    var s = Stopwatch()..start();
     if (optimise) {
-      var s = Stopwatch()..start();
       box.putMany(castUsers);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       for (var user in castUsers) {
         box.put(user);
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
+    var s = Stopwatch()..start();
     if (optimise) {
       final ids = users.map((e) => e.id).toList();
-      var s = Stopwatch()..start();
       box.removeMany(ids);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       for (var user in users) {
         box.remove(user.id);
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override

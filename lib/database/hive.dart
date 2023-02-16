@@ -37,41 +37,35 @@ class HiveDBImpl implements Benchmark {
 
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
+    var s = Stopwatch()..start();
     if (optimise) {
       final Map<dynamic, dynamic> data = {};
       for (var user in users) {
         data[user.id] = user.toMap();
       }
-      var s = Stopwatch()..start();
       await box.putAll(data);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       for (var user in users) {
         await box.put(user.id, user.toMap());
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
+    var s = Stopwatch()..start();
     if (optimise) {
       final ids = users.map((e) => e.id);
-      var s = Stopwatch()..start();
       await box.deleteAll(ids);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       for (var user in users) {
         await box.delete(user.id);
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override

@@ -5,7 +5,6 @@ import 'package:db_benchmarks/interface/user.dart';
 import 'package:db_benchmarks/model/user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
-import 'package:sqlite3/open.dart';
 import 'package:path/path.dart' as path;
 
 class SqliteSyncDBImpl implements Benchmark {
@@ -39,12 +38,11 @@ class SqliteSyncDBImpl implements Benchmark {
   @override
   Future<int> readUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    final ids = users.map((e) => e.id).toList();
     var stmt = db.prepare("SELECT * FROM $USER_TABLE WHERE id = ? LIMIT 1");
     db.execute('BEGIN');
     try {
       for (var user in users) {
-        var results = stmt.execute([user.id]);
+        stmt.execute([user.id]);
       }
       db.execute('COMMIT');
     } catch (e) {

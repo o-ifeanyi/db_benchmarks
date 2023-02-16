@@ -28,64 +28,55 @@ class IsarDBImpl implements Benchmark {
 
   @override
   Future<int> readUsers(List<User> users, bool optimise) async {
+    var s = Stopwatch()..start();
     if (optimise) {
       final ids = users.map((e) => e.id).toList();
-      var s = Stopwatch()..start();
       await isar.isarUserModels.getAll(ids);
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       for (final user in users) {
         await isar.isarUserModels.get(user.id);
       }
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
     final castUsers = List.castFrom<User, IsarUserModel>(users);
+    var s = Stopwatch()..start();
     if (optimise) {
-      var s = Stopwatch()..start();
       await isar.writeTxn((isar) async {
         await isar.isarUserModels.putAll(castUsers);
       });
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       await isar.writeTxn((isar) async {
         for (final user in castUsers) {
           await isar.isarUserModels.put(user);
         }
       });
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
+    var s = Stopwatch()..start();
     if (optimise) {
       final ids = users.map((e) => e.id).toList();
-      var s = Stopwatch()..start();
       await isar.writeTxn((isar) async {
         await isar.isarUserModels.deleteAll(ids);
       });
-      s.stop();
-      return s.elapsedMilliseconds;
     } else {
-      var s = Stopwatch()..start();
       await isar.writeTxn((isar) async {
         for (final user in users) {
           await isar.isarUserModels.delete(user.id);
         }
       });
-      s.stop();
-      return s.elapsedMilliseconds;
     }
+    s.stop();
+    return s.elapsedMilliseconds;
   }
 
   @override

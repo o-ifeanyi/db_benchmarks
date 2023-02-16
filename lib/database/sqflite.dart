@@ -52,7 +52,7 @@ class SqfliteDBImpl implements Benchmark {
           batch.query(USER_TABLE,
               where: "id = ?", whereArgs: [user.id], limit: 1);
         }
-        var results = await batch.apply();
+        await batch.apply();
       });
     } else {
       await db.transaction((txn) async {
