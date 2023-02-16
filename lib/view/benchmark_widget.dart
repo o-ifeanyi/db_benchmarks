@@ -3,6 +3,9 @@ import 'package:db_benchmarks/database/isar.dart';
 import 'package:db_benchmarks/database/object_box.dart';
 import 'package:db_benchmarks/database/sembast.dart';
 import 'package:db_benchmarks/database/sqflite.dart';
+import 'package:db_benchmarks/database/sqflite_ffi.dart';
+import 'package:db_benchmarks/database/sqflite_json.dart';
+import 'package:db_benchmarks/database/sqlite_sync.dart';
 import 'package:db_benchmarks/interface/benchmark.dart';
 import 'package:db_benchmarks/model/result.dart';
 import 'package:db_benchmarks/runner/benchmark_runner_impl.dart';
@@ -15,7 +18,7 @@ class BenchmarkWidget extends StatefulWidget {
 }
 
 class _BenchmarkWidgetState extends State<BenchmarkWidget> {
-  static const entrySteps = [10, 20, 50, 100, 200, 500, 1000, 2000];
+  static const entrySteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 10000];
   late List<Benchmark> runners;
   late List<Benchmark> optimisedRunners;
   bool _optimised = false;
@@ -33,11 +36,16 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
       HiveDBImpl(),
       SembasDBImpl(),
       SqfliteDBImpl(),
+      SqfliteFFIDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];
     optimisedRunners = [
       HiveDBImpl(),
+      SqfliteDBImpl(),
+      SqfliteFFIDBImpl(),
+      SqfliteJsonDBImpl(),
+      SqliteSyncDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];

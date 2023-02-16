@@ -7,7 +7,7 @@ class Result {
   int dbSize = 0;
 
   String get databaseSize {
-    return (dbSize / 1024).toStringAsFixed(2);
+    return (dbSize / 1024 / 1024).toStringAsFixed(2);
   }
 
   Result(this.benchmark, this.optimised);
