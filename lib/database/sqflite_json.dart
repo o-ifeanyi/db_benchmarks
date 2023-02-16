@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:db_benchmarks/interface/benchmark.dart';
@@ -5,21 +6,24 @@ import 'package:db_benchmarks/interface/user.dart';
 import 'package:db_benchmarks/model/user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as path;
 
-class SqfliteDBImpl implements Benchmark {
+class SqfliteJsonDBImpl implements Benchmark {
   late Database db;
   static const String USER_TABLE = "users";
 
   @override
-  String get name => 'Sqflite';
+  String get name => 'Sqflite (JSON1)';
 
   @override
   Future<void> setUp() async {
     final dir = await getApplicationDocumentsDirectory();
-    final dbPath = path.join(dir.path, 'sqlite-sqflite.db');
+    final dbPath = path.join(dir.path, 'sqlite-json1.db');
 
-    databaseFactory = null;
+    sqfliteFfiInit();
+
+    databaseFactory = databaseFactoryFfi;
 
     db = await openDatabase(
       dbPath,
@@ -44,24 +48,10 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> readUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    if (optimise) {
-      await db.transaction((txn) async {
-        var batch = txn.batch();
-
-        for (var user in users) {
-          batch.query(USER_TABLE,
-              where: "id = ?", whereArgs: [user.id], limit: 1);
-        }
-        var results = await batch.apply();
-      });
-    } else {
-      await db.transaction((txn) async {
-        for (var user in users) {
-          await txn.query(USER_TABLE,
-              where: "id = ?", whereArgs: [user.id], limit: 1);
-        }
-      });
-    }
+    final ids = users.map((e) => e.id).toList();
+    await db.query(USER_TABLE,
+        where: "id IN (SELECT json_each.value FROM json_each(?))",
+        whereArgs: [jsonEncode(ids)]);
     s.stop();
     return s.elapsedMilliseconds;
   }
@@ -69,26 +59,19 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    if (optimise) {
-      await db.transaction((txn) async {
-        var batch = txn.batch();
-        for (var user in users) {
-          batch.insert(USER_TABLE, user.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-        await batch.apply(noResult: true);
-      });
-    } else {
-      await db.transaction((txn) async {
-        for (var user in users) {
-          await txn.insert(
-            USER_TABLE,
-            user.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      });
-    }
+    String encoded = jsonEncode([for (var u in users) u.toMap()]);
+    await db.transaction((txn) async {
+      await txn.rawInsert(
+          """INSERT INTO $USER_TABLE(id, createdAt, username, email, age)
+          SELECT 
+            json_extract(json_each.value, '\$.id'),
+            json_extract(json_each.value, '\$.createdAt'),
+            json_extract(json_each.value, '\$.username'),
+            json_extract(json_each.value, '\$.email'),
+            json_extract(json_each.value, '\$.age')
+          FROM json_each(?)
+                  """, [encoded]);
+    });
     s.stop();
     return s.elapsedMilliseconds;
   }
@@ -96,29 +79,12 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    if (optimise) {
-      await db.transaction((txn) async {
-        var batch = txn.batch();
-        for (var user in users) {
-          batch.delete(
-            USER_TABLE,
-            where: "id = ?",
-            whereArgs: [user.id],
-          );
-        }
-        await batch.apply();
-      });
-    } else {
-      await db.transaction((txn) async {
-        for (var user in users) {
-          await txn.delete(
-            USER_TABLE,
-            where: "id = ?",
-            whereArgs: [user.id],
-          );
-        }
-      });
-    }
+    final ids = users.map((e) => e.id).toList();
+    await db.delete(
+      USER_TABLE,
+      where: "id IN (SELECT json_each.value FROM json_each(?))",
+      whereArgs: [jsonEncode(ids)],
+    );
     s.stop();
     return s.elapsedMilliseconds;
   }
@@ -142,7 +108,7 @@ class SqfliteDBImpl implements Benchmark {
     final dir = await getApplicationDocumentsDirectory();
     final files = dir
         .listSync()
-        .where((file) => file.path.toLowerCase().contains('sqlite-sqflite'));
+        .where((file) => file.path.toLowerCase().contains('sqlite-json1'));
     int size = 0;
     for (FileSystemEntity file in files) {
       final stat = file.statSync();
