@@ -39,12 +39,23 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> readUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    for (var user in users) {
-      await db.query(
-        USER_TABLE,
-        where: "id = ?",
-        whereArgs: [user.id],
-      );
+    if (optimise) {
+      await db.transaction((txn) async {
+        var batch = txn.batch();
+
+        for (var user in users) {
+          batch.query(USER_TABLE,
+              where: "id = ?", whereArgs: [user.id], limit: 1);
+        }
+        var results = await batch.apply();
+      });
+    } else {
+      await db.transaction((txn) async {
+        for (var user in users) {
+          await txn.query(USER_TABLE,
+              where: "id = ?", whereArgs: [user.id], limit: 1);
+        }
+      });
     }
     s.stop();
     return s.elapsedMilliseconds;
@@ -53,12 +64,25 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> writeUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    for (var user in users) {
-      await db.insert(
-        USER_TABLE,
-        user.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+    if (optimise) {
+      await db.transaction((txn) async {
+        var batch = txn.batch();
+        for (var user in users) {
+          batch.insert(USER_TABLE, user.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        await batch.apply(noResult: true);
+      });
+    } else {
+      await db.transaction((txn) async {
+        for (var user in users) {
+          await txn.insert(
+            USER_TABLE,
+            user.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      });
     }
     s.stop();
     return s.elapsedMilliseconds;
@@ -67,12 +91,28 @@ class SqfliteDBImpl implements Benchmark {
   @override
   Future<int> deleteUsers(List<User> users, bool optimise) async {
     var s = Stopwatch()..start();
-    for (var user in users) {
-      await db.delete(
-        USER_TABLE,
-        where: "id = ?",
-        whereArgs: [user.id],
-      );
+    if (optimise) {
+      await db.transaction((txn) async {
+        var batch = txn.batch();
+        for (var user in users) {
+          batch.delete(
+            USER_TABLE,
+            where: "id = ?",
+            whereArgs: [user.id],
+          );
+        }
+        await batch.apply();
+      });
+    } else {
+      await db.transaction((txn) async {
+        for (var user in users) {
+          await txn.delete(
+            USER_TABLE,
+            where: "id = ?",
+            whereArgs: [user.id],
+          );
+        }
+      });
     }
     s.stop();
     return s.elapsedMilliseconds;

@@ -38,6 +38,7 @@ class _BenchmarkWidgetState extends State<BenchmarkWidget> {
     ];
     optimisedRunners = [
       HiveDBImpl(),
+      SqfliteDBImpl(),
       ObjectBoxDBImpl(),
       IsarDBImpl(),
     ];
